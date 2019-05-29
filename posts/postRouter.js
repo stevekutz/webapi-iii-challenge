@@ -1,4 +1,10 @@
-const express = 'express';
+const express = 'express';   ///???
+// const express = require('express');   // this should replace above line
+
+
+
+const Posts = require('./postDb.js');
+// const Users = require('../users/userDb.js');
 
 const router = express.Router();
 
