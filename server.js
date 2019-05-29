@@ -6,6 +6,7 @@ const logger = require('morgan');  // logger thingy
 
 // ADD this here and start building postRouter.js
 const PostsRouter = require('./posts/postRouter');
+const UsersRouter = require('./users/userRouter');
 
 
 
@@ -31,7 +32,7 @@ server.use(myLogger);
 // Postsrouter endpoint called out
 // server.use('api/posts', PostsRouter);  // Noooooo, not this.....
 server.use('/posts', PostsRouter);    // but this.....
-
+server.use('/users', UsersRouter);
 
 
 server.get('/', (req, res) => {
