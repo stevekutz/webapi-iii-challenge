@@ -7,6 +7,7 @@ const Users = require('./userDb.js');
 
 const router = express.Router();
 
+// ADD new user 
 router.post('/', async (req, res) => {
     try {
         const user = await Users.insert(req.body);
@@ -20,8 +21,20 @@ router.post('/', async (req, res) => {
       }
 });
 
-router.post('/:id/posts', (req, res) => {
+// ADD user post
+router.post('/:user_id/posts', async (req, res) => {
+    const postInfo = { ...req.body, user_id: req.params.user_id };
 
+    try {
+      const post = await Users.insert(postInfo);
+      res.status(210).json(post);
+    } catch (error) {
+      // log error to server
+      console.log(error);
+      res.status(500).json({
+        message: 'Error adding the post for the user',
+      });
+    }
 });
 
 router.get('/', async (req, res) => {
@@ -38,7 +51,7 @@ router.get('/', async (req, res) => {
 
 });
 
-router.get('/:id', async (req, res) => {
+router.get('/:user_id', async (req, res) => {
     try {
       const user = await Users.getById(req.params.id);
   
