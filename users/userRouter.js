@@ -46,8 +46,22 @@ router.get('/:id', async (req, res) => {
     }
   });
 
-router.get('/:id/posts', (req, res) => {
+router.get('/:user_id/posts', async (req, res) => {
+    const {user_id} = req.params;
 
+    try{
+        const posts = await Users.getUserPosts(user_id);
+
+        if(posts.length) {
+            res.json(posts);
+        } else {
+            res.status(404).json({
+                err: "no posts for this user"
+            })
+        }
+    } catch(err) {
+        res.status(500).json({err});
+    }
 });
 
 router.delete('/:id', (req, res) => {
