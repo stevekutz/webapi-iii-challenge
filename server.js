@@ -22,7 +22,7 @@ server.get('/', (req, res) => {
 
 //custom middleware
 
-function logger(req, res, next) {
+function logger2(req, res, next) {
 
 };
 
