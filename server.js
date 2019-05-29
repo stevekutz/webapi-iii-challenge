@@ -29,7 +29,9 @@ server.use(myLogger);
 
 
 // Postsrouter endpoint called out
-server.use('api/posts', PostsRouter);
+// server.use('api/posts', PostsRouter);  // Noooooo, not this.....
+server.use('/posts', PostsRouter);    // but this.....
+
 
 
 server.get('/', (req, res) => {
@@ -45,18 +47,31 @@ server.get('/', (req, res) => {
 function myLogger(req, res, next){
   
  //  console.log('### req', req);
-  console.log(`\n >>> a ${req.method} method Requesteeee was made 
-               \n >>> from url  ${req.url} 
-               \n >>> at ${new Date().toISOString()}  from myLogger`);
-  
-
+  console.log(
+    ` >>> a ${req.method} method Requesteeee was made 
+      >>> from url  ${req.url} 
+      >>> at ${new Date().toISOString()}  from myLogger`);
   next(); // MUST be called in order to let "next" middlewqware(e.g. morgan) continue
 };
 
-
-
-function logger2(req, res, next) {
-
+// myValidateUserId
+async function myValidateUserId(req, res, next){
+  try {
+    const {id} = req.params;   // makes id    same as req.params.id 
+    // const post = await Posts.findById(id);   // find existing post id
+    const user = await Posts.findById(id);   // find existing post id
+      
+    if(post) {
+        req.post = post;   // attach post to req if it exists
+        next();     // don't forget to let other middleware do its thing also
+      } else {
+        res.status(404).json({
+          message: `Hub not found, ${id} is an invalid id`
+        });
+      }
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to process request'});
+    } 
 };
 
 module.exports = server;
