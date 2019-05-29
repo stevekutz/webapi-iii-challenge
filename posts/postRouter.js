@@ -8,6 +8,7 @@ const Posts = require('./postDb.js');
 
 const router = express.Router();
 
+// GET all posts
 router.get('/', async (req, res) => {
     try {
         //const posts = await Posts.get(req.query);   // no arg in postDb !!!
@@ -22,7 +23,7 @@ router.get('/', async (req, res) => {
       }
 });
 
-
+// GET by id
 router.get('/:id', async (req, res) => {
     try {
       const post = await Posts.getById(req.params.id);
@@ -40,6 +41,28 @@ router.get('/:id', async (req, res) => {
     }
   });
 
+  // ADD new post 
+  router.post('/', async (req, res) => {
+    
+    const newPost = req.body;  
+
+      try {
+        const post = await Posts.insert(newPost);    // looked in postDb.js to see that 'insert' needed
+        res.status(201).json(newPost);
+      } catch (error) {
+        console.log(error);
+        res.status(500).json({
+          error: 'There was an error while saving the post to the database',
+        });
+      }
+ 
+    
+});
+
+
+
+
+// DELETE specific post with id
   router.delete('/:id', async (req, res) => {
     
     const {id} = req.params; // makes id    same as req.params.id
@@ -61,6 +84,7 @@ router.get('/:id', async (req, res) => {
     }
   });
 
+// UPDATE specific post with id  
 router.put('/:id', async (req, res) => {
     const updatedPost = req.body; 
     const {id} = req.params; // makes id    same as req.params.id
