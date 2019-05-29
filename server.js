@@ -24,6 +24,10 @@ server.use(helmet());
 server.use(logger('dev'));
 
 
+//#######->  custom middleware
+server.use(myLogger);
+
+
 // Postsrouter endpoint called out
 server.use('api/posts', PostsRouter);
 
@@ -32,7 +36,24 @@ server.get('/', (req, res) => {
   res.send(`<h2>Routes and custom middleware !</h2>`)
 });
 
-//#######->  custom middleware
+
+
+
+
+//   custom middleware callbacks definitions
+// myLogger
+function myLogger(req, res, next){
+  
+ //  console.log('### req', req);
+  console.log(`\n >>> a ${req.method} method Requesteeee was made 
+               \n >>> from url  ${req.url} 
+               \n >>> at ${new Date().toISOString()}  from myLogger`);
+  
+
+  next(); // MUST be called in order to let "next" middlewqware(e.g. morgan) continue
+};
+
+
 
 function logger2(req, res, next) {
 
