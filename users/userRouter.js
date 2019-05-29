@@ -7,8 +7,17 @@ const Users = require('./userDb.js');
 
 const router = express.Router();
 
-router.post('/', (req, res) => {
-
+router.post('/', async (req, res) => {
+    try {
+        const user = await Users.insert(req.body);
+        res.status(201).json(user);
+      } catch (error) {
+        // log error to server
+        console.log(error);
+        res.status(500).json({
+          message: 'Error adding the user',
+        });
+      }
 });
 
 router.post('/:id/posts', (req, res) => {
@@ -64,12 +73,39 @@ router.get('/:user_id/posts', async (req, res) => {
     }
 });
 
-router.delete('/:id', (req, res) => {
-
+router.delete('/:user_id', async (req, res) => {
+    try {
+        const count = await Users.remove(req.params.user_id);
+        if (count > 0) {
+          res.status(200).json({ message: 'The user has been nuked' });
+        } else {
+          res.status(404).json({ message: 'The user could not be found' });
+        }
+      } catch (error) {
+        // log error to database
+        console.log(error);
+        res.status(500).json({
+          message: 'Error removing the user',
+        });
+      }
 });
 
-router.put('/:id', (req, res) => {
-
+router.put('/:user_id', async (req, res) => {
+    try {
+        const userPost = req.body;
+        const post = await Users.update(req.params.user_id, req.body);
+        if (hub) {
+          res.status(200).json(userPost);  // userPost returns updated body
+        } else {
+          res.status(404).json({ message: `The post with ${user_id} could not be found` });
+        }
+      } catch (error) {
+        // log error to database
+        console.log(error);
+        res.status(500).json({
+          message: 'Error updating the post',
+        });
+      }
 });
 
 //custom middleware
