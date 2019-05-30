@@ -42,7 +42,7 @@ router.get('/:id', async (req, res) => {
   });
 
   // ADD new post 
-  router.post('/', async (req, res) => {
+  router.post('/', validatePost, async (req, res) => {
     
     const newPost = req.body;  
 
@@ -85,7 +85,7 @@ router.get('/:id', async (req, res) => {
   });
 
 // UPDATE specific post with id  
-router.put('/:id', async (req, res) => {
+router.put('/:id', validatePost, validatePostId, async (req, res) => {
     const updatedPost = req.body; 
     const {id} = req.params; // makes id    same as req.params.id
 
@@ -110,8 +110,39 @@ router.put('/:id', async (req, res) => {
 
 // custom middleware
 
-function validatePostId(req, res, next) {
-
+async function validatePostId(req, res, next) {
+    try {
+        const {id} = req.params;   // makes id    same as req.params.id 
+        const post = await Posts.getById(id);   // find existing post id
+          
+        if(post) {
+            req.post = post;   // attach hub to req if it exists
+            next();     // don't forget to let other middleware do its thing also
+          } else {
+            res.status(404).json({
+              message: `yo yo yo, POST not found, dat ${id} is an invalid id`
+            });
+          }
+        } catch (error) {
+            res.status(500).json({ message: 'Failed to process request'});
+        } 
 };
+
+//  goes on post & put 
+function validatePost(req, res, next) {
+     // we want to check the body is defined and not an empty object
+  // otherwise respond with status 400 and a useful message
+
+    // is defined  AND not empty(keys exist) 
+  if(req.body && Object.keys(req.body).length){
+    // #### All good, go to next middleware
+    next();
+  } else {
+    res.status(400).json({
+        message: "missing required text field"
+      })
+  }
+};
+
 
 module.exports = router;

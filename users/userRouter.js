@@ -8,7 +8,7 @@ const Users = require('./userDb.js');
 const router = express.Router();
 
 // ADD new user 
-router.post('/', async (req, res) => {
+router.post('/', validateUser, async (req, res) => {
     try {
         const user = await Users.insert(req.body);
         res.status(201).json(user);
@@ -21,8 +21,8 @@ router.post('/', async (req, res) => {
       }
 });
 
-// ADD user post
-router.post('/:user_id/posts', async (req, res) => {
+// ADD user post    !!!!  Something not working SQLite error about text
+router.post('/:user_id/posts', validateUserId ,async (req, res) => {
     const postInfo = { ...req.body, user_id: req.params.user_id };
 
     try {
@@ -51,14 +51,14 @@ router.get('/', async (req, res) => {
 
 });
 
-router.get('/:user_id', async (req, res) => {
+router.get('/:user_id', validateUserId, async (req, res) => {
     try {
-      const user = await Users.getById(req.params.id);
+      const user = await Users.getById(req.params.user_id);
   
       if (user) {
         res.status(200).json(user);
       } else {
-        res.status(404).json({ message: `User with id ${id} not found` });
+        res.status(404).json({ message: `NOT SEEN with id ${id} not found` });
       }
     } catch (error) {
       console.log(error);
@@ -68,7 +68,7 @@ router.get('/:user_id', async (req, res) => {
     }
   });
 
-router.get('/:user_id/posts', async (req, res) => {
+router.get('/:user_id/posts', validateUserId, async (req, res) => {
     const {user_id} = req.params;
 
     try{
@@ -86,7 +86,7 @@ router.get('/:user_id/posts', async (req, res) => {
     }
 });
 
-router.delete('/:user_id', async (req, res) => {
+router.delete('/:user_id', validateUserId, async (req, res) => {
     try {
         const count = await Users.remove(req.params.user_id);
         if (count > 0) {
@@ -103,11 +103,11 @@ router.delete('/:user_id', async (req, res) => {
       }
 });
 
-router.put('/:user_id', async (req, res) => {
+router.put('/:user_id', validateUserId, validateUser ,async (req, res) => {
     try {
         const userPost = req.body;
         const post = await Users.update(req.params.user_id, req.body);
-        if (hub) {
+        if (post) {
           res.status(200).json(userPost);  // userPost returns updated body
         } else {
           res.status(404).json({ message: `The post with ${user_id} could not be found` });
@@ -122,15 +122,41 @@ router.put('/:user_id', async (req, res) => {
 });
 
 //custom middleware
-
-function validateUserId(req, res, next) {
-
+async function validateUserId(req, res, next) {
+    try {
+        const {user_id} = req.params;   // makes id    same as req.params.id 
+        const user = await Users.getById(user_id);   // find existing user id
+          
+        if(user) {
+            req.user = user;   // attach hub to req if it exists
+            next();     // don't forget to let other middleware do its thing also
+          } else {
+            res.status(400).json({
+              message: `YO DUDE, User not found, ${user_id} is an invalid id`
+            });
+          }
+        } catch (error) {
+            res.status(500).json({ message: 'Failed to process request'});
+        } 
 };
 
+//  goes on post & put 
 function validateUser(req, res, next) {
+     // we want to check the body is defined and not an empty object
+     // otherwise respond with status 400 and a useful message
 
+    // is defined  AND not empty(keys exist) 
+    if(req.body && Object.keys(req.body).length){
+        // #### All good, go to next middleware
+        next();
+      } else {
+        res.status(400).json({
+            message: "ERROR DUDE, missing required name field"
+          })
+      }
 };
 
+// I put this one in postRouter cause that where it belongs
 function validatePost(req, res, next) {
 
 };
